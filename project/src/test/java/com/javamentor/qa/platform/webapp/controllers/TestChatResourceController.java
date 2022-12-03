@@ -302,7 +302,9 @@ public class TestChatResourceController extends AbstractControllerTest {
     // Ни одного GroupChat у авторизованного пользователя
     public void getGroupChatOutPutWithAllMessageWhereUserDoNotHaveChats() throws Exception {
         String token = getToken("2@mail.com", "pass2");
-        mockMvc.perform(get("/api/user/chat/group").param("page", "1").header(AUTHORIZATION, token)
+        mockMvc.perform(get("/api/user/chat/group")
+                        .param("page", "1")
+                        .header(AUTHORIZATION, token)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.currentPageNumber", Is.is(1)))

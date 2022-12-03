@@ -78,7 +78,7 @@ public class AnswerResourceController {
     @ApiOperation(value = "Запись в БД голосования со значением UP за ответ c answerId=* на вопрос с questionId=*")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Поднятие репутации ответа с answerId=* прошло успешно"),
-            @ApiResponse(code = 400, message = "Ошибка голосования: голос уже учтен или формат введенного questionId/answerId является не верным"),
+            @ApiResponse(code = 400, message = "Ошибка голосования: голос уже учтен или формат введенного " + "questionId/answerId является не верным"),
             @ApiResponse(code = 404, message = "Ответ с answerId=* не найден")
     })
     public ResponseEntity<?> insertUpVote(@PathVariable("questionId") Long questionId, @PathVariable("answerId") Long answerId) {
@@ -90,7 +90,7 @@ public class AnswerResourceController {
             if (!(voteOnAnswerService.getIfNotExists(answer.getId(), sender.getId()))) {
                 VoteAnswer upVoteAnswer = new VoteAnswer(sender, answer, UP_VOTE);
                 voteOnAnswerService.persist(upVoteAnswer);
-                return new ResponseEntity<>(voteOnAnswerService.getCountOfVotes(answerId), HttpStatus.OK);
+                return new ResponseEntity<>("Ваш голос принят"+voteOnAnswerService.getCountOfVotes(answerId), HttpStatus.OK);
             }
             return new ResponseEntity<>("Ваш голос уже учтен", HttpStatus.BAD_REQUEST);
         }
