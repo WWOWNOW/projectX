@@ -13,7 +13,7 @@ import java.time.format.DateTimeFormatter;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.AFTER_TEST_METHOD;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -463,5 +463,112 @@ public class TestMessageResourceController extends AbstractControllerTest {
                 .andExpect(jsonPath("$.totalResultCount", Is.is(25)))
                 .andExpect(jsonPath("$.items.length()", Is.is(5)))
                 .andExpect(jsonPath("$.itemsOnPage", Is.is(10)));
+    }
+    @Test
+    @Sql(scripts = "/script/TestMessageResourceController/deleteMessageStarById/Before.sql",
+            executionPhase = BEFORE_TEST_METHOD)
+    @Sql(scripts = "/script/TestMessageResourceController/deleteMessageStarById/After.sql",
+            executionPhase = AFTER_TEST_METHOD)
+    public void successfullyDeleteMessageStarById() throws Exception {
+        String token = getToken("100@mail.com", "pass100");
+        mockMvc.perform(delete("/api/user/message/star")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("id", "100")
+                        .header(AUTHORIZATION, token))
+                .andDo(print())
+                .andExpect(status().isOk());
+
+    }
+    @Test
+    @Sql(scripts = "/script/TestMessageResourceController/deleteMessageStarById/Before.sql",
+            executionPhase = BEFORE_TEST_METHOD)
+    @Sql(scripts = "/script/TestMessageResourceController/deleteMessageStarById/After.sql",
+            executionPhase = AFTER_TEST_METHOD)
+    public void messageStarNotFoundById() throws Exception {
+        String token = getToken("100@mail.com", "pass100");
+        mockMvc.perform(delete("/api/user/message/star")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("id", "101")
+                        .header(AUTHORIZATION, token))
+                .andDo(print())
+                .andExpect(status().isNotFound());
+
+    }
+    @Test
+    @Sql(scripts = "/script/TestMessageResourceController/deleteMessageStarById/Before400.sql",
+            executionPhase = BEFORE_TEST_METHOD)
+    @Sql(scripts = "/script/TestMessageResourceController/deleteMessageStarById/After.sql",
+            executionPhase = AFTER_TEST_METHOD)
+    public void messageBelongsToAnotherUser() throws Exception {
+        String token = getToken("100@mail.com", "pass100");
+        mockMvc.perform(delete("/api/user/message/star")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("id", "101")
+                        .header(AUTHORIZATION, token))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+
+    }
+    @Test
+    @Sql(scripts = "/script/TestMessageResourceController/insertMessageToMessageStarByMessageId/Before.sql",
+            executionPhase = BEFORE_TEST_METHOD)
+    @Sql(scripts = "/script/TestMessageResourceController/insertMessageToMessageStarByMessageId/After.sql",
+            executionPhase = AFTER_TEST_METHOD)
+    public void messageAddedToMessageStarByMessageId() throws Exception {
+        String token = getToken("100@mail.com", "pass100");
+        mockMvc.perform(post("/api/user/message/100/star")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header(AUTHORIZATION, token))
+                .andDo(print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @Sql(scripts = "/script/TestMessageResourceController/insertMessageToMessageStarByMessageId/Before.sql",
+            executionPhase = BEFORE_TEST_METHOD)
+    @Sql(scripts = "/script/TestMessageResourceController/insertMessageToMessageStarByMessageId/After.sql",
+            executionPhase = AFTER_TEST_METHOD)
+    public void userIsNotAChatMember() throws Exception {
+        String token = getToken("1@mail.com", "pass101");
+        mockMvc.perform(post("/api/user/message/100/star")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header(AUTHORIZATION, token))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @Sql(scripts = "/script/TestMessageResourceController/insertMessageToMessageStarByMessageId/Before.sql",
+            executionPhase = BEFORE_TEST_METHOD)
+    @Sql(scripts = "/script/TestMessageResourceController/insertMessageToMessageStarByMessageId/After.sql",
+            executionPhase = AFTER_TEST_METHOD)
+    public void messageNotFound() throws Exception {
+        String token = getToken("100@mail.com", "pass100");
+        mockMvc.perform(post("/api/user/message/102/star")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header(AUTHORIZATION, token))
+                .andDo(print())
+                .andExpect(status().isNotFound());
+    }
+    @Test
+    @Sql(scripts = "/script/TestMessageResourceController/insertMessageToMessageStarByMessageId/Before3msg.sql",
+            executionPhase = BEFORE_TEST_METHOD)
+    @Sql(scripts = "/script/TestMessageResourceController/insertMessageToMessageStarByMessageId/After.sql",
+            executionPhase = AFTER_TEST_METHOD)
+    public void noMoreThanThreeMessageFromOneUser() throws Exception {
+        String token = getToken("100@mail.com", "pass100");
+        mockMvc.perform(post("/api/user/message/100/star")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header(AUTHORIZATION, token))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+
     }
 }

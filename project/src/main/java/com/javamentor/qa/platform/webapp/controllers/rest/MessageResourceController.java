@@ -61,7 +61,7 @@ public class MessageResourceController {
         }
 
         if (messageStar.get().getUser().getId() != user.getId()) {
-            return new ResponseEntity<>("Сообщение другово пользователя не может быть удаленно", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Сообщение другого пользователя не может быть удаленно", HttpStatus.BAD_REQUEST);
         }
 
         messageStarService.deleteById(id);
@@ -69,33 +69,26 @@ public class MessageResourceController {
     }
 
     @PostMapping("/{id}/star")
-    @ApiOperation("При переходе на сообщение c messageId=*, message добавляется в messageStar(избранные сообщения) авторизованного пользователя")
+    @ApiOperation("При переходе на сообщение c messageId=*, message добавляется " +
+            "в messageStar(избранные сообщения) авторизованного пользователя")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Сообщение успешно добавлено в избранные"),
             @ApiResponse(code = 404, message = "Сообщение с messageId=* не найдено"),
             @ApiResponse(code = 400, message = "Нельзя добавлять в избранные более трех сообщений, либо формат введенного messageId является не верным"),
             @ApiResponse(code = 400, message = "Юзер не состоит в чате")
-
     })
-
     public ResponseEntity<?> insertMessageToMessageStarByMessageId(@PathVariable("id") Long id) {
         User userPrincipal = ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
         Optional<Message> message = messageService.getById(id);
-
         if (message.isEmpty()) {
-            return new ResponseEntity<>("Сообщение с id=" + id + " не найден", HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Сообщение с id=" + id + " не найдено", HttpStatus.NOT_FOUND);
         }
-
-
         if (!chatService.isChatHasUser(message.get().getChat().getId(), userPrincipal.getId())) {
             return new ResponseEntity<>("Юзер не состоит в чате", HttpStatus.BAD_REQUEST);
         }
-
         if (!messageStarService.isUserHasNoMoreThanThreeMessageStar(userPrincipal.getId())) {
             return new ResponseEntity<>("Нельзя добавлять в избранные более трех сообщений", HttpStatus.BAD_REQUEST);
         }
-
-
         MessageStar messageStar = new MessageStar();
         messageStar.setUser(userPrincipal);
         messageStar.setMessage(message.get());
