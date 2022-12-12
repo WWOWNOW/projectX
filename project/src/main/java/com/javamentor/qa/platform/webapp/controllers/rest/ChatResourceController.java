@@ -49,7 +49,7 @@ import java.util.Objects;
 @Api("Chats Api")
 @RequestMapping("api/user/chat")
 @AllArgsConstructor
-public class ChatResourceController {
+public class  ChatResourceController {
 
     private final SingleChatDtoServiceImpl singleChatDtoService;
     private final SingleChatService singleChatService;
@@ -138,7 +138,6 @@ public class ChatResourceController {
         groupChatService.persist(groupChat);
         return new ResponseEntity<>("Групповой чат успешно добавлен", HttpStatus.OK);
     }
-
     @PostMapping(value = "/single")
     @ResponseBody
     @ApiOperation(value = "Добавление singleChat")
@@ -189,10 +188,17 @@ public class ChatResourceController {
     @ApiOperation("Добавляет пользователя в групповой чат")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Пользователь успешно добавлен"),
+            @ApiResponse(code = 403, message = "Пользователь может присоединиться только если его добавляет автор этого чата"),
             @ApiResponse(code = 404, message = "Пользователь или групповой чат не найден"),
             @ApiResponse(code = 409, message = "Пользователь уже есть в групповом чате")})
     public ResponseEntity<?> joinGroupChat(@PathVariable("id") Long chatId, @RequestBody Long userId) {
 
+        /*api/user/chat/group/{id}/join*/
+
+        /*Нужно добавить проверку, что пользователь может присоединиться только если его добавляет автор этого чата*/
+
+        /*Если это не так, то кинуть BadRequest, "Данный пользователь не может приглашать других пользователей"*/
+        User author = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Optional<User> userOptional = userService.getById(userId);
         if (userOptional.isEmpty()) {
             return new ResponseEntity<>("Пользователь не найден", HttpStatus.BAD_REQUEST);
@@ -209,11 +215,15 @@ public class ChatResourceController {
         if (chatUsers.contains(user)) {
             return new ResponseEntity<>("Пользователь уже есть в групповом чате", HttpStatus.BAD_REQUEST);
         }
-
+        if (!Objects.equals(author.getId(), chat.getAuthor().getId())) {
+            return new ResponseEntity<>("Пользователь может присоединиться только если его добавляет автор этого чата", HttpStatus.BAD_REQUEST);
+        }
         chatUsers.add(user);
         chat.setUsers(chatUsers);
         groupChatService.update(chat);
         return new ResponseEntity<>("Пользователь успешно добавлен в групповой чат", HttpStatus.OK);
+
+
     }
 
     @PatchMapping("/{id}/group/image")
@@ -231,6 +241,35 @@ public class ChatResourceController {
         groupChatService.update(groupChat);
         return new ResponseEntity<>("Картинка группового чата успешно обновлена", HttpStatus.OK);
     }
+    @PostMapping("/{groupChatID}/group/moder")
+    @ApiOperation("Добавление нового модератора группового чата.")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Модератор чата успешно добавлен"),
+            @ApiResponse(code = 400, message = "Пользователь не находятся в чате"),
+            @ApiResponse(code = 404, message = "Пользователь или чат не найден"),
+    })
+    public ResponseEntity<?> addModeratorsOfGroupChat(@PathVariable("groupChatID") Long groupChatID, @RequestParam Long userId) {
+        Optional<User> userOptional = userService.getById(userId);
+        Optional<GroupChat> chatOptional = groupChatService.getGroupChatWithUsersById(groupChatID);
+        if (userOptional.isEmpty()  || chatOptional.isEmpty()) {
+            return new ResponseEntity<>("Пользователь или чат не найден", HttpStatus.NOT_FOUND);
+        }
+        User userFromOptional = userOptional.get();
+        Set<User> chatModers = new HashSet<>();
+        GroupChat groupChat = chatOptional.get();
+        chatModers.add(userFromOptional);
+        if (!(groupChat.getUsers().contains(userFromOptional))) {
+            return new ResponseEntity<>("У текущего пользователя нет группового чата с groupId = " + groupChatID ,
+                    HttpStatus.BAD_REQUEST);
+        }
+        groupChat.setModerators(chatModers);
+        groupChatService.update(groupChat);
+        return new ResponseEntity<>("Модератор чата успешно добавлен", HttpStatus.OK);
+
+
+
+    }
+
 
     @DeleteMapping("/{groupId}/group")
     @ApiOperation("Удаляет юзера из группового чата по UserId")

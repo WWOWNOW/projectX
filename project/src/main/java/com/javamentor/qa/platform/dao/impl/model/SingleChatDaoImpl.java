@@ -14,6 +14,7 @@ public class SingleChatDaoImpl extends ReadWriteDaoImpl<SingleChat, Long> implem
     @PersistenceContext
     private EntityManager entityManager;
 
+    @Override
     public void deleteChatFromUser(Long chatId, User user){
 
         entityManager.createQuery("update SingleChat sc " +

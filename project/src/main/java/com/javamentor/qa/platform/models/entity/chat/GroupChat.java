@@ -52,6 +52,13 @@ public class GroupChat {
             inverseJoinColumns = @JoinColumn(name = "user_id"))
     private Set<User> users;
 
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "group_chat_moderator",
+            joinColumns = @JoinColumn(name = "chat_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id"))
+    private Set<User> moderators;
+
+
     @Column(name = "image_chat")
     private String imageChat;
 
@@ -94,4 +101,17 @@ public class GroupChat {
         return Objects.hash(id, chat, users, imageChat);
     }
 
+    @Override
+    public String toString() {
+        return "GroupChat{" +
+                "id=" + id +
+                ", isGlobal=" + isGlobal +
+                ", title='" + title + '\'' +
+                ", chat=" + chat +
+                ", users=" + users +
+                ", moderators=" + moderators +
+                ", imageChat='" + imageChat + '\'' +
+                ", author=" + author +
+                '}';
+    }
 }

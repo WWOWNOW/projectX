@@ -430,14 +430,17 @@ public class TestDataInitService {
             groupChat.setTitle("Some group chat " + i);
             groupChat.setImageChat("Some group chat image " + i);
             Set<User> groupChatUsers = new HashSet<>();
+            Set<User> moderators = new HashSet<>();
             List<Message> messages = new ArrayList<>();
             for (long k = 1; k < 5; k++) {
                 User user = userService.getById(k + i).get();
                 groupChatUsers.add(user);
                 messages.add(new Message("Some message in group chat " + k, user, chat));
             }
+            moderators.add(userService.getById(i + 1).get());
             groupChat.setChat(chat);
             groupChat.setUsers(groupChatUsers);
+            groupChat.setModerators(moderators);
             groupChat.setAuthor(userService.getById(i).get());
             groupChatService.persist(groupChat);
             for (Message message : messages) {

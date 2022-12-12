@@ -6,7 +6,11 @@ create table message_star (
                               user_id int8 not null,
                               primary key (id)
 );
-
+create table group_chat_moderator (
+                                     chat_id int8 not null,
+                                     user_id int8 not null,
+                                     primary key (chat_id, user_id)
+);
 alter table message_star
     add constraint message_star_message_fk
         foreign key (message_id)

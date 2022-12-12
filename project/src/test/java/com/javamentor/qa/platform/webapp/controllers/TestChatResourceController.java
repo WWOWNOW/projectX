@@ -50,6 +50,23 @@ public class TestChatResourceController extends AbstractControllerTest {
             executionPhase = BEFORE_TEST_METHOD)
     @Sql(scripts = "/script/TestChatResourceController/joinGroupChat/After.sql",
             executionPhase = AFTER_TEST_METHOD)
+    public void joinGroupChatNotPossibleToInvite() throws Exception {
+        String userToken = getToken("200@mail.com", "pass200");
+        mockMvc.perform(
+                        post("/api/user/chat/group/100/join")
+                                .accept(MediaType.APPLICATION_JSON)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .header(AUTHORIZATION, userToken)
+                                .content("100"))
+                .andExpect(status().isBadRequest());
+    }
+
+
+    @Test
+    @Sql(scripts = "/script/TestChatResourceController/joinGroupChat/Before.sql",
+            executionPhase = BEFORE_TEST_METHOD)
+    @Sql(scripts = "/script/TestChatResourceController/joinGroupChat/After.sql",
+            executionPhase = AFTER_TEST_METHOD)
     public void joinGroupChatDoesChatExist() throws Exception {
         String userToken = getToken("100@mail.com", "pass100");
         mockMvc.perform(
@@ -773,4 +790,50 @@ public class TestChatResourceController extends AbstractControllerTest {
         Assertions.assertEquals(countSC.intValue(), 2);
         Assertions.assertEquals(countM.intValue(), 2);
     }
+    @Test
+    @Sql(scripts = "/script/TestChatResourceController/addModeratorsOfGroupChat/Before.sql",
+            executionPhase = BEFORE_TEST_METHOD)
+    @Sql(scripts = "/script/TestChatResourceController/addModeratorsOfGroupChat/After.sql",
+            executionPhase = AFTER_TEST_METHOD)
+    public void addGroupChatModerators() throws Exception {
+        String userToken = getToken("100@mail.com", "pass100");
+        mockMvc.perform(post("/api/user/chat/100/group/moder")
+                        .header(AUTHORIZATION, userToken)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("userId", "100"))
+                .andExpect(status().isOk())
+                .andDo(print());
+    }
+    @Test
+    @Sql(scripts = "/script/TestChatResourceController/addModeratorsOfGroupChat/Before.sql",
+            executionPhase = BEFORE_TEST_METHOD)
+    @Sql(scripts = "/script/TestChatResourceController/addModeratorsOfGroupChat/After.sql",
+            executionPhase = AFTER_TEST_METHOD)
+    public void addGroupChatModeratorsUserDoesNotHaveAChat() throws Exception {
+        String userToken = getToken("100@mail.com", "pass100");
+        mockMvc.perform(post("/api/user/chat/100/group/moder")
+                        .header(AUTHORIZATION, userToken)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("userId", "200"))
+                .andExpect(status().isBadRequest())
+                .andDo(print());
+    }
+    @Test
+    @Sql(scripts = "/script/TestChatResourceController/addModeratorsOfGroupChat/Before.sql",
+            executionPhase = BEFORE_TEST_METHOD)
+    @Sql(scripts = "/script/TestChatResourceController/addModeratorsOfGroupChat/After.sql",
+            executionPhase = AFTER_TEST_METHOD)
+    public void chatNotFound() throws Exception {
+        String userToken = getToken("100@mail.com", "pass100");
+        mockMvc.perform(post("/api/user/chat/101/group/moder")
+                        .header(AUTHORIZATION, userToken)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("userId", "200"))
+                .andExpect(status().isNotFound())
+                .andDo(print());
+    }
 }
+

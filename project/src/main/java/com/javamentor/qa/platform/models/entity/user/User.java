@@ -13,7 +13,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
 
-@ToString
 @Entity
 @Getter
 @Setter
@@ -130,5 +129,25 @@ public class User implements UserDetails {
     @Override
     public int hashCode() {
         return Objects.hash(id, email, password, fullName);
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "(" +
+                "id = " + id + ", " +
+                "email = " + email + ", " +
+                "password = " + password + ", " +
+                "fullName = " + fullName + ", " +
+                "persistDateTime = " + persistDateTime + ", " +
+                "isEnabled = " + isEnabled + ", " +
+                "isDeleted = " + isDeleted + ", " +
+                "city = " + city + ", " +
+                "linkSite = " + linkSite + ", " +
+                "linkGitHub = " + linkGitHub + ", " +
+                "linkVk = " + linkVk + ", " +
+                "about = " + about + ", " +
+                "imageLink = " + imageLink + ", " +
+                "lastUpdateDateTime = " + lastUpdateDateTime + ", " +
+                "nickname = " + nickname + ")";
     }
 }

@@ -50,4 +50,13 @@ public class Chat {
     public int hashCode() {
         return Objects.hash(id, persistDate, chatType);
     }
+
+    @Override
+    public String toString() {
+        return "Chat{" +
+                "id=" + id +
+                ", persistDate=" + persistDate +
+                ", chatType=" + chatType +
+                '}';
+    }
 }

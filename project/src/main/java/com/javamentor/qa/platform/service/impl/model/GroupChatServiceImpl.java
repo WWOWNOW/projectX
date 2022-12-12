@@ -43,4 +43,10 @@ public class GroupChatServiceImpl extends ReadWriteServiceImpl<GroupChat, Long> 
         }
     }
 
+    @Override
+    public String toString() {
+        return "GroupChatServiceImpl{" +
+                "groupChatDao=" + groupChatDao +
+                '}';
+    }
 }
